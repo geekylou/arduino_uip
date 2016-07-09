@@ -27,7 +27,9 @@
 
 #include "mempool.h"
 
-#define ENC28J60_CONTROL_CS     SS // this is pin 10 on Uno and pin 53 on Mega256
+#define ARDUINO_ARCH_SAM 1
+
+#define ENC28J60_CONTROL_CS     7 // this is pin 10 on Uno and pin 53 on Mega256
 
 #if defined(ARDUINO_ARCH_AVR)
 // AVR-specific code

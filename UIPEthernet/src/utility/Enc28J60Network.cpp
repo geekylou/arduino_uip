@@ -82,7 +82,14 @@ void Enc28J60Network::init(uint8_t* macaddr)
   SPI.setClockDivider(SPI_CLOCK_DIV2); //results in 8MHZ at 16MHZ system clock.
 #elif defined(ARDUINO_ARCH_SAM)
   // SAM-specific code
-  SPI.setClockDivider(10); //defaults to 21 which results in aprox. 4MHZ. A 10 should result in a little more than 8MHZ.
+  
+  	
+    SPI.begin();
+	SPI.setBitOrder(MSBFIRST);
+	SPI.setDataMode(SPI_MODE0);
+	SPI.setClockDivider(SPI_CLOCK_DIV16);
+    pinMode(ENC28J60_CONTROL_CS, OUTPUT);
+  //SPI.setClockDivider(10); //defaults to 21 which results in aprox. 4MHZ. A 10 should result in a little more than 8MHZ.
 #else
 // generic, non-platform specific code
 #endif
