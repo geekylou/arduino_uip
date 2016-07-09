@@ -449,7 +449,7 @@ void uip_log(char *msg);
 #ifdef UIP_CONF_LLH_LEN
 #define UIP_LLH_LEN UIP_CONF_LLH_LEN
 #else /* UIP_CONF_LLH_LEN */
-#define UIP_LLH_LEN     14
+#define UIP_LLH_LEN     18
 #endif /* UIP_CONF_LLH_LEN */
 
 /** @} */

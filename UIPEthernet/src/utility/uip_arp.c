@@ -58,12 +58,11 @@
  *
  */
 
-
 #include "uip_arp.h"
 
 #include <string.h>
 
-struct arp_hdr {
+struct __attribute__((packed)) arp_hdr {
   struct uip_eth_hdr ethhdr;
   u16_t hwtype;
   u16_t protocol;
@@ -76,7 +75,7 @@ struct arp_hdr {
   u16_t dipaddr[2];
 };
 
-struct ethip_hdr {
+struct __attribute__((packed)) ethip_hdr {
   struct uip_eth_hdr ethhdr;
   /* IP header. */
   u8_t vhl,
@@ -283,9 +282,11 @@ uip_arp_arpin(void)
     return;
   }
   uip_len = 0;
+  volatile int opcode = HTONS(BUF->opcode);
   
-  switch(BUF->opcode) {
-  case HTONS(ARP_REQUEST):
+  switch(opcode) {
+  case ARP_REQUEST:
+  
     /* ARP request. If it asked for our address, we send out a
        reply. */
     if(uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
@@ -293,6 +294,8 @@ uip_arp_arpin(void)
 	 table, since it is likely that we will do more communication
 	 with this host in the future. */
       uip_arp_update(BUF->sipaddr, &BUF->shwaddr);
+      
+      BUF->ethhdr.vlan_tag = 0x64000081;
       
       /* The reply opcode is 2. */
       BUF->opcode = HTONS(2);
@@ -311,7 +314,7 @@ uip_arp_arpin(void)
       uip_len = sizeof(struct arp_hdr);
     }
     break;
-  case HTONS(ARP_REPLY):
+  case ARP_REPLY:
     /* ARP reply. We insert or update the ARP table if it was meant
        for us. */
     if(uip_ipaddr_cmp(BUF->dipaddr, uip_hostaddr)) {
@@ -387,12 +390,13 @@ uip_arp_out(void)
     if(i == UIP_ARPTAB_SIZE) {
       /* The destination address was not in our ARP table, so we
 	 overwrite the IP packet with an ARP request. */
-
+      
       memset(BUF->ethhdr.dest.addr, 0xff, 6);
       memset(BUF->dhwaddr.addr, 0x00, 6);
       memcpy(BUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
       memcpy(BUF->shwaddr.addr, uip_ethaddr.addr, 6);
-    
+      BUF->ethhdr.vlan_tag = 0x64000081;
+      
       uip_ipaddr_copy(BUF->dipaddr, ipaddr);
       uip_ipaddr_copy(BUF->sipaddr, uip_hostaddr);
       BUF->opcode = HTONS(ARP_REQUEST); /* ARP request. */
@@ -413,6 +417,7 @@ uip_arp_out(void)
   }
   memcpy(IPBUF->ethhdr.src.addr, uip_ethaddr.addr, 6);
   
+  IPBUF->ethhdr.vlan_tag = 0x64000081;
   IPBUF->ethhdr.type = HTONS(UIP_ETHTYPE_IP);
 
   uip_len += sizeof(struct uip_eth_hdr);

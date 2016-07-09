@@ -60,9 +60,10 @@ extern struct uip_eth_addr uip_ethaddr;
 /**
  * The Ethernet header.
  */
-struct uip_eth_hdr {
-  struct uip_eth_addr dest;
-  struct uip_eth_addr src;
+struct __attribute__((packed)) uip_eth_hdr {
+  struct __attribute__((packed)) uip_eth_addr dest;
+  struct __attribute__((packed)) uip_eth_addr src;
+  uint32_t vlan_tag;
   u16_t type;
 };
 
